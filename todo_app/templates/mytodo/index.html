@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}
+- Top -
+{% endblock %}
+
+{% block contents %}
+<div class="index">
+    <h1>Todo List</h1>
+    <a href="{% url 'add' %}">タスクを追加</a>
+
+    <h2>- 未完了のタスク -</h2>
+    <ul>
+        {% for task in todo_list %}
+            {% if not task.complete %}
+            <li class="{% if task.complete %}complete{% endif %}">
+                <form action="{% url 'update_task_complete' %}" method="post" class="{% if task.complete %}strikethrough{% endif %}">
+                    {% csrf_token %}
+    
+                    <input type="hidden" name="task_id" value="{{ task.id }}">
+                    <input type="checkbox" name="task_{{ task.id }}" onchange="this.form.submit()" {% if task.complete %}checked{% endif %}>
+                    <div class="task-header">
+                        <span class="task-title">{{ task.title }}</span>
+                        <span class="task-date">
+                            {{ task.start_date|date:"Y年m月d日 H:i" }} - {{ task.end_date|date:"Y年m月d日 H:i" }}
+                        </span>
+                    </div>
+                    <p class="task-description">{{ task.description }}</p>
+                </form>
+                <div class="task-act">
+                    <a href="{% url 'edit' task.id %}" class="edit">編集</a>
+                    <a href="#" onclick="confirmDelete('{{ task.title }}', '{{ task.id }}');" class="del">削除</a>
+
+                    <!-- 削除フォーム -->
+                    <form id="delete-form-{{ task.id }}" action="/delete/{{ task.id }}/" method="post" style="display: none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <button type="submit">削除する</button>
+                    </form>
+                </div>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <h2>- 完了したタスク -</h2>
+    <ul>
+        {% for task in todo_list %}
+            {% if task.complete %}
+            <li class="{% if task.complete %}complete{% endif %}">
+                <form action="{% url 'update_task_complete' %}" method="post" class="{% if task.complete %}strikethrough{% endif %}">
+                    {% csrf_token %}
+    
+                    <input type="hidden" name="task_id" value="{{ task.id }}">
+                    <input type="checkbox" name="task_{{ task.id }}" onchange="this.form.submit()" {% if task.complete %}checked{% endif %}>
+                    <div class="task-header">
+                        <span class="task-title">{{ task.title }}</span>
+                        <span class="task-date">
+                            {{ task.start_date|date:"Y年m月d日 H:i" }} - {{ task.end_date|date:"Y年m月d日 H:i" }}
+                        </span>
+                    </div>
+                    <p class="task-description">{{ task.description }}</p>
+                </form>
+                <div class="task-act">
+                    <a href="{% url 'edit' task.id %}" class="edit">編集</a>
+                    <a href="#" onclick="confirmDelete('{{ task.title }}', '{{ task.id }}');" class="del">削除</a>
+
+                    <!-- 削除フォーム -->
+                    <form id="delete-form-{{ task.id }}" action="/delete/{{ task.id }}/" method="post" style="display: none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="task_id" value="{{ task.id }}">
+                        <button type="submit">削除する</button>
+                    </form>
+                </div>
+            </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    function confirmDelete(taskTitle, taskId) {
+        if (confirm('" '+ taskTitle + ' " を本当に削除しますか？')) {
+            document.getElementById('delete-form-' + taskId).submit();
+        }
+    }
+</script>
+
+{% endblock %}
